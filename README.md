@@ -4,7 +4,7 @@ Um plugin inovador que integra a modelagem 3D do SketchUp com Inteligência Arti
 
 ## 🏗️ Arquitetura do Projeto
 
-O projeto adota o princípio de **Separação de Responsabilidades (SRP)**, dividindo o sistema em duas camadas principais:
+O projeto adota o princípio de **Separação de Responsabilidades**, dividindo o sistema em duas camadas principais:
 
 *   **Backend (Python/FastAPI):** Responsável por processar prompts, interagir com modelos de LLM (ex: Gemini) e devolver uma matriz de dados geométricos estruturados em JSON via uma arquitetura API-First.
 *   **Frontend (Ruby/SketchUp):** Um cliente HTTP nativo que captura as intenções do usuário, comunica-se com a API e renderiza as coordenadas espaciais transformando-as em faces, grupos e componentes 3D no SketchUp.
