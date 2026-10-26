@@ -1,40 +1,72 @@
 # SketchUp AI Assistant 🚀
 
-Um plugin inovador que integra a modelagem 3D do SketchUp com Inteligência Artificial Generativa. Este projeto estabelece uma ponte de comunicação entre o ecossistema Ruby do SketchUp e um servidor backend moderno em Python.
+Um plugin inovador que integra a modelagem 3D do SketchUp com Inteligência Artificial Generativa. O arquiteto descreve o móvel, anexa imagens de referência e o modelo aparece no SketchUp, organizado em grupos e componentes editáveis.
 
 ## 🏗️ Arquitetura do Projeto
 
-O projeto adota o princípio de **Separação de Responsabilidades**, dividindo o sistema em duas camadas principais:
+O sistema tem três partes, e a IA nunca gera código Ruby: ela devolve um JSON validado (o contrato), que o plugin transforma em geometria.
 
-*   **Backend (Python/FastAPI):** Responsável por processar prompts, interagir com modelos de LLM (ex: Gemini) e devolver uma matriz de dados geométricos estruturados em JSON via uma arquitetura API-First.
-*   **Frontend (Ruby/SketchUp):** Um cliente HTTP nativo que captura as intenções do usuário, comunica-se com a API e renderiza as coordenadas espaciais transformando-as em faces, grupos e componentes 3D no SketchUp.
+*   **App desktop (`desktop_app/`):** janela própria feita com pywebview, onde o arquiteto escreve o prompt, envia imagens e vê a prévia. Roda o backend no mesmo processo.
+*   **Backend (`backend_python/`, Python/FastAPI):** processa os pedidos, chama o modelo de IA e valida a geometria. Escuta só em `127.0.0.1`, protegido por um token gerado a cada execução.
+*   **Extensão SketchUp (`frontend_ruby/`, Ruby):** conecta ao app, recebe os modelos e os desenha. Segue as regras da Extension Warehouse: só Ruby legível, sem binários.
+
+O app grava a porta e o token em `~/.sketchup_ai_assistant/conexao.json`; é ali que a extensão os encontra. A extensão consulta a fila do app a cada 2 segundos, então o SketchUp nunca fica travado esperando a IA.
+
+### Contrato de dados (v1.0)
+
+`ObjetoGeradoSchema` em `backend_python/schemas.py`: `versao_contrato`, `unidade` (sempre cm), `nome_objeto`, `dimensoes_totais` e a lista de `pecas`, cada uma com `dimensoes` e `posicao_relativa`. O exemplo em `tests/exemplos/mesa_de_centro.json` é validado pelos testes Python e Ruby.
+
+### Rotas do backend
+
+| Rota | Uso |
+| --- | --- |
+| `GET /saude` | Status, provedor de IA e se o SketchUp está conectado (sem token) |
+| `POST /v1/gerar` | Gera e devolve o modelo (prévia na janela do app) |
+| `POST /v1/gerar-mock` | Mesa de centro de teste, sem IA |
+| `POST /v1/tarefas` | Gera em segundo plano e põe o resultado na fila (usado pela extensão) |
+| `POST /v1/fila` | Envia um modelo aprovado ao SketchUp |
+| `GET /v1/fila/proximo` | Próximo modelo a desenhar (204 quando vazio) |
+
+As rotas `/v1` exigem o cabeçalho `X-Token`.
 
 ## 🛤️ Roadmap e Status do Projeto
 
-O desenvolvimento está dividido em fases lógicas para garantir a estabilidade do contrato de dados.
+Decisões: foco em **mobiliário**, v1 com um **modelo de IA de mercado** (Gemini) e, na versão comercial, **assinatura paga**, com a chave da IA guardada num servidor nosso.
 
-### ✅ Fase 1: Fundação e Mocking (Concluído)
-- [x] Configuração do ambiente virtual Python e instalação de dependências (FastAPI, Uvicorn, Pydantic).
-- [x] Criação do contrato de dados (`ObjetoGeradoSchema`) definindo dimensões totais e peças relativas (x, y, z).
-- [x] Implementação do endpoint de Mocking (`/gerar-mock`) para isolar o front-end da latência da IA.
-- [x] Desenvolvimento do Cliente HTTP em Ruby (`api_client.rb`) com requisições POST seguras.
-- [x] Refatoração do módulo Ruby garantindo o tratamento de respostas e o *Parse* correto de String para Hash JSON.
+### ✅ Fase 1: Fundação e Mocking
+- [x] Contrato de dados versionado (`ObjetoGeradoSchema` v1.0) com unidade explícita
+- [x] Endpoint de mock e cliente HTTP em Ruby
 
-### ⏳ Fase 2: Motor Geométrico (Em Andamento)
-- [ ] Implementação da lógica de desenho iterativo no `sketchup_draw.rb`.
-- [ ] Tradução das coordenadas (x, y, z) do Hash Ruby para a classe `Geom::Transformation` do SketchUp.
-- [ ] Encapsulamento automático das peças geradas em Componentes/Grupos isolados.
+### ✅ Fase 2: Protótipo do app e do motor geométrico
+- [x] App desktop pywebview + FastAPI, com prévia em vista frontal e superior
+- [x] Extensão SketchUp instalável (`.rbz`), com menu e conexão ao app
+- [x] Desenho com `Geom::Transformation`, uma operação desfazível por modelo e componentes compartilhados para peças iguais
+- [x] Validação geométrica (peças dentro da caixa, apoiadas no chão) com nova tentativa da IA
+- [x] Testes Python e Ruby, incluindo um teste de ponta a ponta app ↔ cliente Ruby
 
-### 🚀 Fase 3: IA e Materiais (Futuro)
-- [ ] Substituição do endpoint de Mock pela integração real com a API do Google Gemini.
-- [ ] Envio e decodificação de imagens de referência (Base64).
-- [ ] Especificação avançada e mapeamento de materiais (ex: aplicação automatizada de texturas de madeira, mármore ou quartzito com base no prompt).
-- [ ] Criação da Interface Gráfica (UI) utilizando as janelas de diálogo HTML/JS nativas do SketchUp.
+### 🚀 Fase 3: IA real e assinatura
+- [ ] Testar o provedor Gemini com casos reais e montar um conjunto de avaliação
+- [ ] Servidor na nuvem com login e assinatura, que guarda a chave da IA
+- [ ] Materiais (madeira, mármore, quartzito) a partir do prompt
+- [ ] Assinatura de código do executável
 
 ## 🛠️ Como Executar Localmente
 
-### Subindo o Servidor Python
-1. Navegue até a pasta `backend_python`.
-2. Ative o ambiente virtual (`venv\Scripts\activate` ou `source venv/bin/activate`).
-3. Execute o comando: `uvicorn main:app --reload`
-4. A documentação da API estará disponível em `http://127.0.0.1:8000/docs`.
+### App desktop
+1. Na raiz do repositório, crie e ative um ambiente virtual (`python -m venv .venv` e `.venv\Scripts\activate` ou `source .venv/bin/activate`).
+2. Instale as dependências: `pip install -r backend_python/requirements-dev.txt`
+3. Opcional: copie `.env.example` para `.env` e preencha `GEMINI_API_KEY` com `SKETCHUP_AI_PROVEDOR=gemini`. Sem isso, o app usa o mock.
+4. Rode `python desktop_app/app.py`. A janela abre e o servidor sobe numa porta livre.
+
+Só o backend, sem janela: `uvicorn backend_python.servidor_dev:app --reload` (documentação em `http://127.0.0.1:8000/docs`).
+
+### Extensão no SketchUp
+1. Gere o pacote: `python scripts/empacotar_rbz.py`
+2. No SketchUp: Extensões › Extension Manager › Install Extension, e escolha `dist/sketchup_ai_assistant.rbz`.
+3. Com o app aberto, use Extensões › SketchUp AI Assistant › Conectar ao app. Depois, "Enviar ao SketchUp" na janela do app desenha o modelo.
+
+### Executável para distribuir
+`python scripts/build_app.py` gera `dist/SketchUpAIAssistant/`. O build é feito com `--onedir` e sem UPX para reduzir falsos positivos de antivírus. Enquanto o executável não for assinado, o Windows mostra o aviso do SmartScreen na primeira execução, e cada versão pode ser enviada para análise em https://www.microsoft.com/en-us/wdsi/filesubmission.
+
+### Testes
+`pytest` e `ruby tests/ruby/test_plugin.rb`, na raiz do repositório.

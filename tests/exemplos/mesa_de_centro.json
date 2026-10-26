@@ -1,0 +1,51 @@
+{
+  "versao_contrato": "1.0",
+  "unidade": "cm",
+  "nome_objeto": "mesa_de_centro",
+  "dimensoes_totais": {
+    "comprimento_x": 100.0,
+    "largura_y": 50.0,
+    "altura_z": 45.0
+  },
+  "pecas": [
+    {
+      "nome_peca": "tampo_superior",
+      "dimensoes": {
+        "comprimento_x": 100.0,
+        "largura_y": 50.0,
+        "altura_z": 5.0
+      },
+      "posicao_relativa": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 40.0
+      }
+    },
+    {
+      "nome_peca": "pe_esquerdo",
+      "dimensoes": {
+        "comprimento_x": 5.0,
+        "largura_y": 50.0,
+        "altura_z": 40.0
+      },
+      "posicao_relativa": {
+        "x": 5.0,
+        "y": 0.0,
+        "z": 0.0
+      }
+    },
+    {
+      "nome_peca": "pe_direito",
+      "dimensoes": {
+        "comprimento_x": 5.0,
+        "largura_y": 50.0,
+        "altura_z": 40.0
+      },
+      "posicao_relativa": {
+        "x": 90.0,
+        "y": 0.0,
+        "z": 0.0
+      }
+    }
+  ]
+}
