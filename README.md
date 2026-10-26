@@ -44,8 +44,11 @@ Decisões: foco em **mobiliário**, v1 com um **modelo de IA de mercado** (Gemin
 - [x] Validação geométrica (peças dentro da caixa, apoiadas no chão) com nova tentativa da IA
 - [x] Testes Python e Ruby, incluindo um teste de ponta a ponta app ↔ cliente Ruby
 
-### 🚀 Fase 3: IA real e assinatura
-- [ ] Testar o provedor Gemini com casos reais e montar um conjunto de avaliação
+### ⏳ Fase 3: IA real e assinatura
+- [x] Conjunto de avaliação com 20 móveis e script de pontuação (`scripts/avaliar.py`)
+- [x] Dataset local dos modelos aprovados, base para o modelo próprio no futuro
+- [x] Refinar a prévia com um pedido de ajuste ("deixe o tampo mais fino")
+- [ ] Rodar a avaliação com o Gemini e ajustar o prompt até uma nota mínima
 - [ ] Servidor na nuvem com login e assinatura, que guarda a chave da IA
 - [ ] Materiais (madeira, mármore, quartzito) a partir do prompt
 - [ ] Assinatura de código do executável
@@ -67,6 +70,12 @@ Só o backend, sem janela: `uvicorn backend_python.servidor_dev:app --reload` (d
 
 ### Executável para distribuir
 `python scripts/build_app.py` gera `dist/SketchUpAIAssistant/`. O build é feito com `--onedir` e sem UPX para reduzir falsos positivos de antivírus. Enquanto o executável não for assinado, o Windows mostra o aviso do SmartScreen na primeira execução, e cada versão pode ser enviada para análise em https://www.microsoft.com/en-us/wdsi/filesubmission.
+
+### Avaliação da IA
+`python scripts/avaliar.py` roda os 20 pedidos de `avaliacao/casos.json` no provedor configurado e dá uma nota de 0 a 100% por caso: geometria válida, quantidade de peças plausível e presença das peças esperadas (tampo, pés, gavetas…). O mock tira cerca de 48%, porque sempre devolve a mesma mesa; é a linha de base que o Gemini precisa superar. Cada execução grava um relatório em `avaliacao/resultados/`.
+
+### Dataset de modelos aprovados
+Cada "Enviar ao SketchUp" na janela do app grava o pedido e o modelo aprovado em `~/.sketchup_ai_assistant/dataset/aprovados.jsonl`, e as imagens de referência em `dataset/imagens/`. Os dados ficam só no computador do arquiteto. Para desligar, use `SKETCHUP_AI_SALVAR_DATASET=0` no `.env`.
 
 ### Testes
 `pytest` e `ruby tests/ruby/test_plugin.rb`, na raiz do repositório.

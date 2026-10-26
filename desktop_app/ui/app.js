@@ -3,6 +3,8 @@ const TOKEN = new URLSearchParams(location.hash.slice(1)).get("token") || "";
 
 const $ = (id) => document.getElementById(id);
 let objetoAtual = null;
+// O pedido que gerou o objeto atual: vai junto ao SketchUp para o dataset de modelos aprovados
+let entradaAtual = null;
 
 async function api(caminho, opcoes = {}) {
   const resposta = await fetch(caminho, {
@@ -109,37 +111,58 @@ function mostrarPrevia(objeto) {
   );
 }
 
-$("formulario").addEventListener("submit", async (evento) => {
-  evento.preventDefault();
-  $("botao-gerar").disabled = true;
-  mostrarMensagem("Gerando…");
+async function gerar(entrada, botao) {
+  botao.disabled = true;
+  mostrarMensagem(entrada.objeto_base ? "Refinando…" : "Gerando…");
   try {
-    const imagens = await Promise.all([...$("imagens").files].slice(0, 4).map(lerImagem));
-    const objeto = await api("/v1/gerar", {
-      method: "POST",
-      body: JSON.stringify({
-        prompt_usuario: $("prompt").value.trim(),
-        imagens,
-        dimensoes_limite: {
-          comprimento_x: Number($("dim-x").value),
-          largura_y: Number($("dim-y").value),
-          altura_z: Number($("dim-z").value),
-        },
-      }),
-    });
+    const objeto = await api("/v1/gerar", { method: "POST", body: JSON.stringify(entrada) });
+    entradaAtual = entrada;
     mostrarPrevia(objeto);
     mostrarMensagem(`${objeto.pecas.length} peças geradas.`, "ok");
+    return true;
   } catch (erro) {
     mostrarMensagem(erro.message, "erro");
+    return false;
   } finally {
-    $("botao-gerar").disabled = false;
+    botao.disabled = false;
   }
+}
+
+function dimensoesLimite() {
+  return {
+    comprimento_x: Number($("dim-x").value),
+    largura_y: Number($("dim-y").value),
+    altura_z: Number($("dim-z").value),
+  };
+}
+
+$("formulario").addEventListener("submit", async (evento) => {
+  evento.preventDefault();
+  let imagens;
+  try {
+    imagens = await Promise.all([...$("imagens").files].slice(0, 4).map(lerImagem));
+  } catch {
+    mostrarMensagem("Não foi possível ler as imagens.", "erro");
+    return;
+  }
+  await gerar({ prompt_usuario: $("prompt").value.trim(), imagens, dimensoes_limite: dimensoesLimite() }, $("botao-gerar"));
+});
+
+// O ajuste reaproveita as imagens e limites do pedido anterior e manda o modelo atual como base
+$("formulario-refinar").addEventListener("submit", async (evento) => {
+  evento.preventDefault();
+  if (!objetoAtual) return;
+  const ok = await gerar(
+    { ...entradaAtual, prompt_usuario: $("ajuste").value.trim(), objeto_base: objetoAtual },
+    $("botao-refinar")
+  );
+  if (ok) $("ajuste").value = "";
 });
 
 $("botao-enviar").addEventListener("click", async () => {
   if (!objetoAtual) return;
   try {
-    await api("/v1/fila", { method: "POST", body: JSON.stringify(objetoAtual) });
+    await api("/v1/fila", { method: "POST", body: JSON.stringify({ objeto: objetoAtual, entrada: entradaAtual }) });
     const saude = await api("/saude");
     mostrarMensagem(
       saude.sketchup_conectado
