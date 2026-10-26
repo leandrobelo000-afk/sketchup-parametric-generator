@@ -1,3 +1,4 @@
+import json
 import time
 
 import pytest
@@ -69,9 +70,9 @@ def test_fila_entrega_na_ordem_e_marca_sketchup_conectado(cliente):
 
     objeto = cliente.post("/v1/gerar", json=ENTRADA, headers=CABECALHO).json()
     objeto["nome_objeto"] = "primeiro"
-    cliente.post("/v1/fila", json=objeto, headers=CABECALHO)
+    cliente.post("/v1/fila", json={"objeto": objeto}, headers=CABECALHO)
     objeto["nome_objeto"] = "segundo"
-    cliente.post("/v1/fila", json=objeto, headers=CABECALHO)
+    cliente.post("/v1/fila", json={"objeto": objeto}, headers=CABECALHO)
 
     assert cliente.get("/v1/fila/proximo", headers=CABECALHO).json()["objeto"]["nome_objeto"] == "primeiro"
     assert cliente.get("/v1/fila/proximo", headers=CABECALHO).json()["objeto"]["nome_objeto"] == "segundo"
@@ -103,3 +104,36 @@ def test_falha_da_ia_vira_422_e_mensagem_de_erro_na_fila():
         mensagem = esperar_fila(cliente)
     assert mensagem["tipo"] == "erro"
     assert "peça fora dos limites" in mensagem["mensagem"]
+
+
+def test_refinar_parte_do_modelo_anterior(cliente):
+    objeto = cliente.post("/v1/gerar", json=ENTRADA, headers=CABECALHO).json()
+    objeto["nome_objeto"] = "mesa_ajustada"
+    refinado = cliente.post(
+        "/v1/gerar", json={**ENTRADA, "prompt_usuario": "tampo mais fino", "objeto_base": objeto}, headers=CABECALHO
+    ).json()
+    assert refinado["nome_objeto"] == "mesa_ajustada"
+
+
+def test_envio_aprovado_vai_para_o_dataset(tmp_path):
+    cliente = TestClient(create_app(token=TOKEN, provedor=ProvedorMock(), dataset_dir=tmp_path))
+    entrada = {**ENTRADA, "imagens": [{"mime_type": "image/png", "dados_base64": "iVBORw0K"}]}
+    objeto = cliente.post("/v1/gerar", json=entrada, headers=CABECALHO).json()
+
+    # A mesma imagem enviada duas vezes vira um só arquivo
+    cliente.post("/v1/fila", json={"objeto": objeto, "entrada": entrada}, headers=CABECALHO)
+    cliente.post("/v1/fila", json={"objeto": objeto, "entrada": entrada}, headers=CABECALHO)
+
+    linhas = (tmp_path / "aprovados.jsonl").read_text(encoding="utf-8").splitlines()
+    assert len(linhas) == 2
+    registro = json.loads(linhas[0])
+    assert registro["prompt_usuario"] == "mesa de centro"
+    assert registro["objeto"]["nome_objeto"] == "mesa_de_centro"
+    assert registro["refinamento"] is False
+    assert [p.name for p in (tmp_path / "imagens").iterdir()] == registro["imagens"]
+
+
+def test_sem_dataset_dir_nada_e_gravado(cliente, tmp_path):
+    objeto = cliente.post("/v1/gerar", json=ENTRADA, headers=CABECALHO).json()
+    assert cliente.post("/v1/fila", json={"objeto": objeto}, headers=CABECALHO).status_code == 202
+    assert not (tmp_path / "aprovados.jsonl").exists()

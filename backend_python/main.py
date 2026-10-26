@@ -10,16 +10,23 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from .ai_service import ErroGeracao, ProvedorIA, ProvedorMock, criar_provedor
-from .schemas import VERSAO_CONTRATO, InputGeracaoSchema, ObjetoGeradoSchema
+from .dataset import registrar_aprovado
+from .schemas import VERSAO_CONTRATO, EnvioSketchupSchema, InputGeracaoSchema, ObjetoGeradoSchema
 
 # Tempo sem consultas à fila após o qual consideramos o SketchUp desconectado, em segundos
 SKETCHUP_TIMEOUT = 5.0
 
 
-def create_app(token: Optional[str] = None, provedor: Optional[ProvedorIA] = None, ui_dir: Optional[Path] = None) -> FastAPI:
+def create_app(
+    token: Optional[str] = None,
+    provedor: Optional[ProvedorIA] = None,
+    ui_dir: Optional[Path] = None,
+    dataset_dir: Optional[Path] = None,
+) -> FastAPI:
     """
     Monta a API. O app desktop chama esta função com um token aleatório;
     só quem conhece o token (a janela do app e o plugin) acessa as rotas /v1.
+    Com dataset_dir, cada modelo aprovado na janela do app é guardado nessa pasta.
     """
     app = FastAPI(title="SketchUp AI Assistant API", version=VERSAO_CONTRATO)
     app.state.provedor = provedor or criar_provedor()
@@ -85,9 +92,11 @@ def create_app(token: Optional[str] = None, provedor: Optional[ProvedorIA] = Non
         return {"status": "em_andamento"}
 
     @app.post("/v1/fila", status_code=202)
-    def enviar_ao_sketchup(objeto: ObjetoGeradoSchema):
+    def enviar_ao_sketchup(envio: EnvioSketchupSchema):
         """A janela do app aprovou a prévia: o plugin vai desenhá-la na próxima consulta."""
-        app.state.fila.append({"tipo": "objeto", "objeto": objeto.model_dump()})
+        app.state.fila.append({"tipo": "objeto", "objeto": envio.objeto.model_dump()})
+        if dataset_dir:
+            registrar_aprovado(dataset_dir, envio.objeto, envio.entrada)
         return {"status": "na_fila", "posicao": len(app.state.fila)}
 
     @app.get("/v1/fila/proximo")

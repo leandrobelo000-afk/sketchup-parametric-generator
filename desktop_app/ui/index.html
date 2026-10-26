@@ -51,6 +51,13 @@
           <thead><tr><th>Peça</th><th>X × Y × Z (cm)</th><th>Posição (cm)</th></tr></thead>
           <tbody id="tabela-pecas"></tbody>
         </table>
+        <form id="formulario-refinar" class="refinar">
+          <label for="ajuste">Refinar este modelo</label>
+          <div class="linha">
+            <input id="ajuste" type="text" minlength="3" required placeholder="Ex.: deixe o tampo mais fino e afaste os pés das bordas">
+            <button id="botao-refinar" type="submit">Refinar</button>
+          </div>
+        </form>
         <button id="botao-enviar" type="button">Enviar ao SketchUp</button>
       </div>
     </section>

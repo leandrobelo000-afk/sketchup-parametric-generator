@@ -73,7 +73,7 @@ main {
 
 label { display: block; margin: 12px 0 4px; color: var(--quieto); }
 
-textarea, input[type="number"] {
+textarea, input[type="number"], input[type="text"] {
   width: 100%;
   padding: 8px;
   border: 1px solid var(--borda);
@@ -116,3 +116,8 @@ svg rect { fill: var(--peca); stroke: var(--destaque); stroke-width: 1; vector-e
 table { width: 100%; border-collapse: collapse; margin-top: 16px; }
 th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--borda); }
 th { color: var(--quieto); font-weight: 500; }
+
+.refinar { margin-top: 16px; }
+.linha { display: flex; gap: 8px; align-items: center; }
+.linha input { flex: 1; }
+.linha button { margin-top: 0; white-space: nowrap; }

@@ -24,6 +24,10 @@ class ProvedorMock:
     nome = "mock"
 
     async def gerar(self, entrada: InputGeracaoSchema) -> ObjetoGeradoSchema:
+        # O mock não entende o pedido de ajuste: devolve o modelo anterior como veio
+        if entrada.objeto_base:
+            return entrada.objeto_base.model_copy(deep=True)
+
         limite = entrada.dimensoes_limite or Dimensoes3D(comprimento_x=100.0, largura_y=50.0, altura_z=45.0)
         x, y, z = limite.comprimento_x, limite.largura_y, limite.altura_z
         tampo, pe = 5.0, 5.0
@@ -78,6 +82,11 @@ class ProvedorGemini:
         Calcule as dimensões e a posição espacial (X, Y, Z), em cm, de cada peça de forma que elas se encaixem perfeitamente.
         A origem (0,0,0) é o canto inferior do objeto; nenhuma peça pode ter coordenada negativa nem sair de dimensoes_totais.
         """
+        if entrada.objeto_base:
+            texto += (
+                "\nEste é o modelo atual, em JSON. Aplique somente o ajuste pedido acima e mantenha o restante igual:\n"
+                + entrada.objeto_base.model_dump_json()
+            )
         if erros_anteriores:
             texto += "\nSua resposta anterior tinha estes problemas, corrija-os:\n- " + "\n- ".join(erros_anteriores)
         return texto
