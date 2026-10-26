@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SketchUp AI Assistant</title>
+  <link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+  <header>
+    <h1>SketchUp AI Assistant</h1>
+    <div class="status">
+      <span id="status-provedor" class="selo">conectando…</span>
+      <span id="status-sketchup" class="selo">SketchUp: verificando…</span>
+    </div>
+  </header>
+
+  <main>
+    <form id="formulario" class="painel">
+      <h2>O que vamos modelar?</h2>
+
+      <label for="prompt">Descrição</label>
+      <textarea id="prompt" rows="4" required minlength="3"
+        placeholder="Ex.: mesa de centro moderna em madeira, tampo fino e dois pés laterais"></textarea>
+
+      <label for="imagens">Imagens de referência (até 4)</label>
+      <input id="imagens" type="file" accept="image/jpeg,image/png,image/webp" multiple>
+      <div id="miniaturas" class="miniaturas"></div>
+
+      <fieldset>
+        <legend>Dimensões limite (cm)</legend>
+        <label>Comprimento X <input id="dim-x" type="number" min="1" step="0.1" value="100"></label>
+        <label>Largura Y <input id="dim-y" type="number" min="1" step="0.1" value="50"></label>
+        <label>Altura Z <input id="dim-z" type="number" min="1" step="0.1" value="45"></label>
+      </fieldset>
+
+      <button id="botao-gerar" type="submit">Gerar prévia</button>
+      <p id="mensagem" class="mensagem" role="status"></p>
+    </form>
+
+    <section class="painel">
+      <h2>Prévia</h2>
+      <p id="vazio" class="quieto">A prévia aparece aqui depois de gerar.</p>
+      <div id="previa" hidden>
+        <h3 id="nome-objeto"></h3>
+        <div class="vistas">
+          <figure><svg id="vista-frontal" viewBox="0 0 300 200"></svg><figcaption>Vista frontal (X × Z)</figcaption></figure>
+          <figure><svg id="vista-superior" viewBox="0 0 300 200"></svg><figcaption>Vista superior (X × Y)</figcaption></figure>
+        </div>
+        <table>
+          <thead><tr><th>Peça</th><th>X × Y × Z (cm)</th><th>Posição (cm)</th></tr></thead>
+          <tbody id="tabela-pecas"></tbody>
+        </table>
+        <button id="botao-enviar" type="button">Enviar ao SketchUp</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
