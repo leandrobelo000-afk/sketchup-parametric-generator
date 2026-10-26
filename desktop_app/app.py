@@ -24,8 +24,8 @@ from dotenv import load_dotenv
 
 from backend_python.main import create_app
 
-PASTA_CONEXAO = Path.home() / ".sketchup_ai_assistant"
-ARQUIVO_CONEXAO = PASTA_CONEXAO / "conexao.json"
+PASTA_APP = Path.home() / ".sketchup_ai_assistant"
+ARQUIVO_CONEXAO = PASTA_APP / "conexao.json"
 
 
 def pasta_ui() -> Path:
@@ -41,7 +41,7 @@ def porta_livre() -> int:
 
 
 def escrever_conexao(porta: int, token: str) -> None:
-    PASTA_CONEXAO.mkdir(exist_ok=True)
+    PASTA_APP.mkdir(exist_ok=True)
     ARQUIVO_CONEXAO.write_text(json.dumps({"porta": porta, "token": token, "pid": os.getpid()}))
 
 
@@ -56,7 +56,9 @@ def remover_conexao() -> None:
 
 
 def iniciar_servidor(porta: int, token: str) -> uvicorn.Server:
-    app = create_app(token=token, ui_dir=pasta_ui())
+    # SKETCHUP_AI_SALVAR_DATASET=0 desliga o registro local dos modelos aprovados
+    salvar = os.getenv("SKETCHUP_AI_SALVAR_DATASET", "1") != "0"
+    app = create_app(token=token, ui_dir=pasta_ui(), dataset_dir=PASTA_APP / "dataset" if salvar else None)
     # log_config=None: no executável sem console não existe stdout para o log padrão do uvicorn
     servidor = uvicorn.Server(uvicorn.Config(app, host="127.0.0.1", port=porta, log_config=None))
     threading.Thread(target=servidor.run, daemon=True).start()

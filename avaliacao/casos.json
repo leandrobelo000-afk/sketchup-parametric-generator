@@ -1,0 +1,458 @@
+[
+  {
+    "id": "mesa_centro_dois_pes",
+    "prompt_usuario": "Mesa de centro moderna em madeira, tampo fino e dois pés laterais em placa",
+    "dimensoes_limite": {
+      "comprimento_x": 100,
+      "largura_y": 50,
+      "altura_z": 45
+    },
+    "pecas_min": 3,
+    "pecas_max": 4,
+    "pecas_esperadas": [
+      [
+        "tampo"
+      ],
+      [
+        "pe",
+        "lateral"
+      ]
+    ]
+  },
+  {
+    "id": "mesa_centro_quatro_pes",
+    "prompt_usuario": "Mesa de centro com tampo quadrado e quatro pés finos",
+    "dimensoes_limite": {
+      "comprimento_x": 80,
+      "largura_y": 80,
+      "altura_z": 40
+    },
+    "pecas_min": 5,
+    "pecas_max": 6,
+    "pecas_esperadas": [
+      [
+        "tampo"
+      ],
+      [
+        "pe"
+      ]
+    ]
+  },
+  {
+    "id": "mesa_jantar_6_lugares",
+    "prompt_usuario": "Mesa de jantar retangular para 6 lugares, quatro pés e saia em volta do tampo",
+    "dimensoes_limite": {
+      "comprimento_x": 180,
+      "largura_y": 90,
+      "altura_z": 76
+    },
+    "pecas_min": 5,
+    "pecas_max": 12,
+    "pecas_esperadas": [
+      [
+        "tampo"
+      ],
+      [
+        "pe"
+      ],
+      [
+        "saia",
+        "travessa",
+        "aba"
+      ]
+    ]
+  },
+  {
+    "id": "mesa_lateral",
+    "prompt_usuario": "Mesa lateral pequena com tampo e prateleira inferior",
+    "dimensoes_limite": {
+      "comprimento_x": 45,
+      "largura_y": 45,
+      "altura_z": 55
+    },
+    "pecas_min": 4,
+    "pecas_max": 8,
+    "pecas_esperadas": [
+      [
+        "tampo"
+      ],
+      [
+        "prateleira"
+      ],
+      [
+        "pe",
+        "lateral"
+      ]
+    ]
+  },
+  {
+    "id": "escrivaninha_gaveteiro",
+    "prompt_usuario": "Escrivaninha com tampo, uma lateral em placa e um gaveteiro de 3 gavetas do outro lado",
+    "dimensoes_limite": {
+      "comprimento_x": 120,
+      "largura_y": 60,
+      "altura_z": 75
+    },
+    "pecas_min": 5,
+    "pecas_max": 15,
+    "pecas_esperadas": [
+      [
+        "tampo"
+      ],
+      [
+        "lateral"
+      ],
+      [
+        "gaveta"
+      ]
+    ]
+  },
+  {
+    "id": "banco_simples",
+    "prompt_usuario": "Banco de madeira simples com assento e dois pés em placa",
+    "dimensoes_limite": {
+      "comprimento_x": 120,
+      "largura_y": 35,
+      "altura_z": 45
+    },
+    "pecas_min": 3,
+    "pecas_max": 5,
+    "pecas_esperadas": [
+      [
+        "assento"
+      ],
+      [
+        "pe",
+        "lateral"
+      ]
+    ]
+  },
+  {
+    "id": "banqueta_alta",
+    "prompt_usuario": "Banqueta alta com assento quadrado, quatro pés e apoio para os pés",
+    "dimensoes_limite": {
+      "comprimento_x": 40,
+      "largura_y": 40,
+      "altura_z": 75
+    },
+    "pecas_min": 6,
+    "pecas_max": 10,
+    "pecas_esperadas": [
+      [
+        "assento"
+      ],
+      [
+        "pe"
+      ],
+      [
+        "apoio",
+        "travessa"
+      ]
+    ]
+  },
+  {
+    "id": "cadeira_basica",
+    "prompt_usuario": "Cadeira com assento, encosto reto e quatro pés",
+    "dimensoes_limite": {
+      "comprimento_x": 45,
+      "largura_y": 50,
+      "altura_z": 90
+    },
+    "pecas_min": 6,
+    "pecas_max": 10,
+    "pecas_esperadas": [
+      [
+        "assento"
+      ],
+      [
+        "encosto"
+      ],
+      [
+        "pe"
+      ]
+    ]
+  },
+  {
+    "id": "estante_5_prateleiras",
+    "prompt_usuario": "Estante de livros com duas laterais, base, topo e 5 prateleiras",
+    "dimensoes_limite": {
+      "comprimento_x": 80,
+      "largura_y": 30,
+      "altura_z": 180
+    },
+    "pecas_min": 7,
+    "pecas_max": 12,
+    "pecas_esperadas": [
+      [
+        "lateral"
+      ],
+      [
+        "prateleira"
+      ],
+      [
+        "topo",
+        "tampo"
+      ],
+      [
+        "base"
+      ]
+    ]
+  },
+  {
+    "id": "estante_vazada",
+    "prompt_usuario": "Estante vazada sem fundo com 4 nichos iguais em 2 colunas",
+    "dimensoes_limite": {
+      "comprimento_x": 80,
+      "largura_y": 35,
+      "altura_z": 80
+    },
+    "pecas_min": 5,
+    "pecas_max": 10,
+    "pecas_esperadas": [
+      [
+        "lateral"
+      ],
+      [
+        "prateleira",
+        "divisoria",
+        "divisor"
+      ]
+    ]
+  },
+  {
+    "id": "rack_tv",
+    "prompt_usuario": "Rack de TV baixo com tampo, duas portas e um nicho central aberto",
+    "dimensoes_limite": {
+      "comprimento_x": 180,
+      "largura_y": 45,
+      "altura_z": 50
+    },
+    "pecas_min": 5,
+    "pecas_max": 14,
+    "pecas_esperadas": [
+      [
+        "tampo"
+      ],
+      [
+        "porta"
+      ],
+      [
+        "lateral"
+      ],
+      [
+        "base"
+      ]
+    ]
+  },
+  {
+    "id": "aparador",
+    "prompt_usuario": "Aparador com tampo, duas laterais, prateleira inferior e fundo",
+    "dimensoes_limite": {
+      "comprimento_x": 140,
+      "largura_y": 40,
+      "altura_z": 85
+    },
+    "pecas_min": 5,
+    "pecas_max": 8,
+    "pecas_esperadas": [
+      [
+        "tampo"
+      ],
+      [
+        "lateral"
+      ],
+      [
+        "prateleira"
+      ],
+      [
+        "fundo"
+      ]
+    ]
+  },
+  {
+    "id": "criado_mudo",
+    "prompt_usuario": "Criado-mudo com uma gaveta e um nicho aberto embaixo, pés curtos",
+    "dimensoes_limite": {
+      "comprimento_x": 45,
+      "largura_y": 40,
+      "altura_z": 55
+    },
+    "pecas_min": 6,
+    "pecas_max": 14,
+    "pecas_esperadas": [
+      [
+        "gaveta"
+      ],
+      [
+        "lateral"
+      ],
+      [
+        "tampo"
+      ],
+      [
+        "pe"
+      ]
+    ]
+  },
+  {
+    "id": "comoda_4_gavetas",
+    "prompt_usuario": "Cômoda com 4 gavetas iguais, laterais, tampo e rodapé",
+    "dimensoes_limite": {
+      "comprimento_x": 100,
+      "largura_y": 45,
+      "altura_z": 90
+    },
+    "pecas_min": 7,
+    "pecas_max": 16,
+    "pecas_esperadas": [
+      [
+        "gaveta"
+      ],
+      [
+        "lateral"
+      ],
+      [
+        "tampo"
+      ],
+      [
+        "rodape",
+        "base"
+      ]
+    ]
+  },
+  {
+    "id": "guarda_roupa_2_portas",
+    "prompt_usuario": "Guarda-roupa de 2 portas com laterais, topo, base, fundo e uma prateleira interna",
+    "dimensoes_limite": {
+      "comprimento_x": 100,
+      "largura_y": 55,
+      "altura_z": 200
+    },
+    "pecas_min": 7,
+    "pecas_max": 12,
+    "pecas_esperadas": [
+      [
+        "porta"
+      ],
+      [
+        "lateral"
+      ],
+      [
+        "prateleira"
+      ],
+      [
+        "fundo"
+      ]
+    ]
+  },
+  {
+    "id": "armario_cozinha_aereo",
+    "prompt_usuario": "Armário aéreo de cozinha com 2 portas e uma prateleira interna",
+    "dimensoes_limite": {
+      "comprimento_x": 80,
+      "largura_y": 35,
+      "altura_z": 70
+    },
+    "pecas_min": 6,
+    "pecas_max": 10,
+    "pecas_esperadas": [
+      [
+        "porta"
+      ],
+      [
+        "lateral"
+      ],
+      [
+        "prateleira"
+      ]
+    ]
+  },
+  {
+    "id": "balcao_pia",
+    "prompt_usuario": "Balcão de pia com tampo, duas portas, laterais e rodapé recuado",
+    "dimensoes_limite": {
+      "comprimento_x": 120,
+      "largura_y": 55,
+      "altura_z": 90
+    },
+    "pecas_min": 6,
+    "pecas_max": 12,
+    "pecas_esperadas": [
+      [
+        "tampo"
+      ],
+      [
+        "porta"
+      ],
+      [
+        "lateral"
+      ],
+      [
+        "rodape"
+      ]
+    ]
+  },
+  {
+    "id": "cama_casal",
+    "prompt_usuario": "Cama de casal com estrutura de caixa, cabeceira alta e estrado",
+    "dimensoes_limite": {
+      "comprimento_x": 158,
+      "largura_y": 210,
+      "altura_z": 110
+    },
+    "pecas_min": 4,
+    "pecas_max": 12,
+    "pecas_esperadas": [
+      [
+        "cabeceira"
+      ],
+      [
+        "lateral"
+      ],
+      [
+        "estrado"
+      ]
+    ]
+  },
+  {
+    "id": "sofa_3_lugares_simplificado",
+    "prompt_usuario": "Sofá de 3 lugares simplificado em blocos: base, assento, encosto e dois braços",
+    "dimensoes_limite": {
+      "comprimento_x": 210,
+      "largura_y": 90,
+      "altura_z": 85
+    },
+    "pecas_min": 5,
+    "pecas_max": 10,
+    "pecas_esperadas": [
+      [
+        "base"
+      ],
+      [
+        "assento"
+      ],
+      [
+        "encosto"
+      ],
+      [
+        "braco"
+      ]
+    ]
+  },
+  {
+    "id": "painel_ripado",
+    "prompt_usuario": "Painel ripado de parede com 12 ripas verticais iguais sobre uma base",
+    "dimensoes_limite": {
+      "comprimento_x": 120,
+      "largura_y": 3,
+      "altura_z": 240
+    },
+    "pecas_min": 12,
+    "pecas_max": 14,
+    "pecas_esperadas": [
+      [
+        "ripa"
+      ]
+    ]
+  }
+]
