@@ -47,3 +47,49 @@ def test_script_de_avaliacao_roda_com_o_mock(monkeypatch, tmp_path):
     media = avaliar.main(["--arquivo", str(CASOS), "--casos", "mesa_centro_dois_pes"])
     assert media == 1.0
     assert len(list((tmp_path / "avaliacao" / "resultados").iterdir())) == 1
+
+
+def test_gemini_espera_e_tenta_de_novo_no_limite_de_uso(monkeypatch):
+    from google.genai import errors
+
+    import backend_python.ai_service as ai
+
+    esperas = []
+
+    async def dormir(segundos):
+        esperas.append(segundos)
+
+    monkeypatch.setattr(ai.asyncio, "sleep", dormir)
+    resposta_ok = mesa().model_dump_json()
+    chamadas = []
+
+    class Resposta:
+        text = resposta_ok
+
+    async def gerar_conteudo(**_):
+        chamadas.append(1)
+        if len(chamadas) <= 2:
+            raise errors.ClientError(429, {"error": {"message": "limite"}})
+        return Resposta()
+
+    provedor = ai.ProvedorGemini("chave-falsa", "modelo")
+    monkeypatch.setattr(provedor._cliente.aio.models, "generate_content", gerar_conteudo)
+    objeto = asyncio.run(provedor.gerar(InputGeracaoSchema(prompt_usuario="mesa")))
+
+    assert objeto.nome_objeto == "mesa_de_centro"
+    assert esperas == [15, 30]
+
+
+def test_gemini_nao_insiste_em_erro_que_nao_e_de_limite(monkeypatch):
+    import pytest
+    from google.genai import errors
+
+    import backend_python.ai_service as ai
+
+    async def gerar_conteudo(**_):
+        raise errors.ClientError(400, {"error": {"message": "chave inválida"}})
+
+    provedor = ai.ProvedorGemini("chave-falsa", "modelo")
+    monkeypatch.setattr(provedor._cliente.aio.models, "generate_content", gerar_conteudo)
+    with pytest.raises(errors.ClientError):
+        asyncio.run(provedor.gerar(InputGeracaoSchema(prompt_usuario="mesa")))
