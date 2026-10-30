@@ -1,3 +1,4 @@
+import asyncio
 import base64
 import os
 from typing import Optional, Protocol
@@ -55,6 +56,11 @@ class ProvedorMock:
         )
 
 
+# Esperas, em segundos, antes de cada nova tentativa quando o Gemini recusa por limite de uso (429)
+# ou por sobrecarga (503). O nível gratuito tem poucas chamadas por minuto.
+ESPERAS_LIMITE = (15, 30, 60)
+
+
 class ProvedorGemini:
     """
     Envia o prompt e as imagens ao Gemini e exige o retorno no formato do contrato.
@@ -66,7 +72,9 @@ class ProvedorGemini:
     def __init__(self, api_key: str, modelo: str):
         # Importado aqui para o app funcionar em modo mock sem o SDK instalado
         from google import genai
+        from google.genai import errors
         self._tipos = genai.types
+        self._erro_api = errors.APIError
         self._cliente = genai.Client(api_key=api_key)
         self.modelo = modelo
 
@@ -91,6 +99,17 @@ class ProvedorGemini:
             texto += "\nSua resposta anterior tinha estes problemas, corrija-os:\n- " + "\n- ".join(erros_anteriores)
         return texto
 
+    async def _chamar(self, conteudo, configuracao):
+        for espera in (*ESPERAS_LIMITE, None):
+            try:
+                return await self._cliente.aio.models.generate_content(
+                    model=self.modelo, contents=conteudo, config=configuracao
+                )
+            except self._erro_api as erro:
+                if erro.code not in (429, 503) or espera is None:
+                    raise
+                await asyncio.sleep(espera)
+
     async def gerar(self, entrada: InputGeracaoSchema) -> ObjetoGeradoSchema:
         imagens = [
             self._tipos.Part.from_bytes(data=base64.b64decode(img.dados_base64), mime_type=img.mime_type)
@@ -105,11 +124,7 @@ class ProvedorGemini:
         erros = None
         # Uma tentativa extra: se a geometria vier inválida, devolvemos os erros para a IA corrigir
         for _ in range(2):
-            resposta = await self._cliente.aio.models.generate_content(
-                model=self.modelo,
-                contents=[*imagens, self._prompt(entrada, erros)],
-                config=configuracao,
-            )
+            resposta = await self._chamar([*imagens, self._prompt(entrada, erros)], configuracao)
             objeto = ObjetoGeradoSchema.model_validate_json(resposta.text)
             erros = validar_geometria(objeto, entrada.dimensoes_limite)
             if not erros:

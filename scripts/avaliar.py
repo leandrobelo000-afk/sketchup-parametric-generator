@@ -5,6 +5,7 @@ Serve para comparar versões do prompt, modelos e provedores com os mesmos pedid
 Uso, na raiz do repositório:
   python scripts/avaliar.py                       # usa SKETCHUP_AI_PROVEDOR do .env (mock por padrão)
   python scripts/avaliar.py --casos mesa_lateral  # só os casos indicados
+Com o Gemini, os casos são espaçados em 6 s para caber no nível gratuito (--intervalo muda isso).
 O relatório completo vai para avaliacao/resultados/.
 """
 import argparse
@@ -24,9 +25,12 @@ from backend_python.avaliacao import CasoAvaliacao, avaliar_caso
 from backend_python.schemas import InputGeracaoSchema
 
 
-async def avaliar(casos, provedor):
+async def avaliar(casos, provedor, intervalo=0.0):
     resultados = []
-    for caso in casos:
+    for indice, caso in enumerate(casos):
+        if indice and intervalo:
+            # Espaça as chamadas para caber no limite por minuto do nível gratuito
+            await asyncio.sleep(intervalo)
         entrada = InputGeracaoSchema(prompt_usuario=caso.prompt_usuario, dimensoes_limite=caso.dimensoes_limite)
         try:
             resultado = avaliar_caso(caso, await provedor.gerar(entrada))
@@ -41,6 +45,8 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--casos", nargs="*", help="ids dos casos a rodar (padrão: todos)")
     parser.add_argument("--arquivo", type=Path, default=RAIZ / "avaliacao" / "casos.json")
+    parser.add_argument("--intervalo", type=float, default=None,
+                        help="segundos entre casos (padrão: 6 com o Gemini, 0 com o mock)")
     args = parser.parse_args(argv)
 
     load_dotenv(RAIZ / ".env")
@@ -49,7 +55,8 @@ def main(argv=None):
         casos = [c for c in casos if c.id in args.casos]
 
     provedor = criar_provedor()
-    resultados = asyncio.run(avaliar(casos, provedor))
+    intervalo = args.intervalo if args.intervalo is not None else (6.0 if provedor.nome == "gemini" else 0.0)
+    resultados = asyncio.run(avaliar(casos, provedor, intervalo))
     media = sum(r["nota"] for r in resultados) / len(resultados) if resultados else 0.0
     print(f"\nNota média ({provedor.nome}, {len(resultados)} casos): {media * 100:.0f}%")
 
